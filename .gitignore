@@ -1,28 +1,46 @@
-# Environment
-.env
+# Environments
+env/
+venv/
+ENV/
+.venv/
 
 # Python
 __pycache__/
 *.py[cod]
+*$py.class
 *.pyo
 *.pyd
-*.so
-
-# Virtual environment
-venv/
-.venv/
-env/
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
 
 # Django
+*.log
+local_settings.py
 db.sqlite3
-staticfiles/
+db.sqlite3-journal
 media/
+staticfiles/
 
-# IDE
-.vscode/
+# IDEs
 .idea/
-*.swp
+.vscode/
 
-# OS
-.DS_Store
+# Seguridad y Variables de Entorno
+.env
+.env.*
+!.env.example
+
+# Docker
+*.dockerignore
+
+# Archivos de configuración de Windows
 Thumbs.db
+desktop.ini
+
+# pytest / coverage
+.coverage
+htmlcov/
+.pytest_cache/
