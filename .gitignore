@@ -44,3 +44,6 @@ desktop.ini
 .coverage
 htmlcov/
 .pytest_cache/
+
+# Postman (local API testing collection)
+postman/
