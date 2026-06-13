@@ -87,6 +87,9 @@ DATABASES = {
         "OPTIONS": {
             "driver": "ODBC Driver 18 for SQL Server",
             "extra_params": "TrustServerCertificate=no",
+            # Azure SQL (Proxy policy + Central US) needs more than the
+            # default 15s login timeout to complete the handshake.
+            "connection_timeout": env.int("SQL_CONNECTION_TIMEOUT", default=60),
         },
     }
 }
