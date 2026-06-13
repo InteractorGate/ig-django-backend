@@ -76,6 +76,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 # ── Database – Azure ─────────────────────────────────────────────────────
 DATABASES = {
+    
     "default": {
         "ENGINE": "mssql",
         "NAME": env("SQL_DB"),
