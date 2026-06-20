@@ -85,8 +85,12 @@ DATABASES = {
         "HOST": env("SQL_HOST"),
         "PORT": env("SQL_PORT", default="1433"),
         "OPTIONS": {
-            "driver": "ODBC Driver 18 for SQL Server",
-            "extra_params": "TrustServerCertificate=no",
+            # Driver name varies by host: containers install Driver 18, while
+            # a dev machine may only have 17. Override via SQL_ODBC_DRIVER.
+            "driver": env("SQL_ODBC_DRIVER", default="ODBC Driver 18 for SQL Server"),
+            # Encrypt=yes is required by Azure SQL. Driver 18 defaults to it;
+            # Driver 17 does not, so set it explicitly for cross-driver safety.
+            "extra_params": "Encrypt=yes;TrustServerCertificate=no",
             # Azure SQL (Proxy policy + Central US) needs more than the
             # default 15s login timeout to complete the handshake.
             "connection_timeout": env.int("SQL_CONNECTION_TIMEOUT", default=60),
@@ -94,9 +98,9 @@ DATABASES = {
     }
 }
 
-# ── MongoDB Atlas – logs & training data ────────────────────────────────────────────
+# ── Azure Cosmos DB (MongoDB API) – logs & training data ──────────────────────
 MONGODB = {
-    "URI": env("MONGO_URI"),   # full Atlas connection string from .env
+    "URI": env("MONGO_URI"),   # full Cosmos DB connection string from .env
     "DB":  env("MONGO_DB"),
 }
 
