@@ -1,5 +1,5 @@
 """
-MongoDB Atlas client for InteractorGate.
+Azure Cosmos DB (MongoDB API) client for InteractorGate.
 """
 
 from django.conf import settings
@@ -12,7 +12,7 @@ _client: MongoClient | None = None
 def get_mongo_client() -> MongoClient:
     global _client
     if _client is None:
-        # Atlas URI comes directly from .env — includes auth and cluster
+        # Cosmos DB URI comes directly from .env — includes auth and host
         _client = MongoClient(settings.MONGODB["URI"])
     return _client
 

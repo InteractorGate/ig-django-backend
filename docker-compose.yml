@@ -3,6 +3,8 @@ version: "3.9"
 services:
 
   # ── Django backend ───────────────────────────────────────────────────────────
+  # Databases are cloud-hosted (Azure SQL + Azure Cosmos DB), so no local
+  # DB containers are needed — connection strings come from .env.
   backend:
     build:
       context: .
@@ -18,12 +20,3 @@ services:
       - .env
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings.local
-    depends_on:
-      postgres:
-        condition: service_healthy
-      mongodb:
-        condition: service_healthy
-
-volumes:
-  postgres_data:
-  mongodb_data:
