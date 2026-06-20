@@ -1,4 +1,5 @@
-FROM python:3.13-slim
+# Pinned to bookworm so the Microsoft ODBC repo (debian/12) below matches the OS.
+FROM python:3.13-slim-bookworm
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -26,4 +27,10 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 # Copy project
 COPY . .
 
+# Production defaults (App Service overrides DJANGO_SETTINGS_MODULE if needed)
+ENV DJANGO_SETTINGS_MODULE=config.settings.production
+
 EXPOSE 8000
+
+# On boot: apply migrations, collect static, then serve via gunicorn.
+CMD ["bash", "-c", "python manage.py migrate --noinput && python manage.py collectstatic --noinput && exec gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 120"]

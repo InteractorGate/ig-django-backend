@@ -1,0 +1,15 @@
+# Never bake local secrets or dev cruft into the image
+.env
+.env.*
+.venv/
+venv/
+env/
+.git/
+.github/
+__pycache__/
+*.pyc
+*.pyo
+db.sqlite3
+.pytest_cache/
+*.md
+staticfiles/
