@@ -1,0 +1,24 @@
+name: Enforce Branch Policy
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check-source-branch:
+    name: Validate source branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if PR comes from develop
+        run: |
+          SOURCE="${{ github.head_ref }}"
+          echo "Source branch: $SOURCE"
+          
+          if [ "$SOURCE" != "develop" ]; then
+            echo "❌ ERROR: Only 'develop' can be merged into 'main'."
+            echo "   Your branch '$SOURCE' must first be merged into 'develop'."
+            exit 1
+          fi
+          
+          echo "✅ Source branch is 'develop'. Proceeding."
