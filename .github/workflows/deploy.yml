@@ -2,7 +2,7 @@ name: Build and deploy to Azure App Service
 
 on:
   push:
-    branches: [main, ci/azure-deploy]
+    branches: [main]
   workflow_dispatch:
 
 env:
