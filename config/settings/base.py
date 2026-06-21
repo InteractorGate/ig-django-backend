@@ -138,6 +138,17 @@ REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": (
         "rest_framework.renderers.JSONRenderer",
     ),
+    # Rate limiting — protects the API (and especially auth) from abuse/brute force.
+    "DEFAULT_THROTTLE_CLASSES": (
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+    ),
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "60/min",     # generous for normal use; blocks floods
+        "user": "240/min",
+        "login": "10/min",    # scoped throttle on the login endpoint
+        "register": "20/hour",  # scoped throttle on registration
+    },
 }
 
 # ── JWT ───────────────────────────────────────────────────────────────────────
@@ -155,6 +166,8 @@ SIMPLE_JWT = {
 }
 
 # ── CORS ──────────────────────────────────────────────────────────────────────
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-]
+# Env-driven so the real frontend origin(s) can be set per environment. A Flutter
+# *desktop* app sends no Origin header, so CORS only matters for a future web build.
+CORS_ALLOWED_ORIGINS = env.list(
+    "CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"]
+)
