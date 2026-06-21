@@ -28,6 +28,7 @@ SECURE_HSTS_SECONDS = 31_536_000  # 1 year
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = "same-origin"
 
 # Django 4+ requires scheme-qualified origins for admin/CSRF over HTTPS.
 CSRF_TRUSTED_ORIGINS = [
