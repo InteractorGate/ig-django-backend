@@ -184,7 +184,7 @@ tráfico va sobre **HTTPS/TLS**.
 | 5 | Integración de modelos de IA | ⚠️ RNN real (LSTM PyTorch) · CNN en desarrollo |
 | 6 | Hardening de seguridad + Azure | ✅ Completo |
 | 7 | CI/CD y despliegue | ✅ Completo |
-| 8 | Testing y QA | ⚠️ Pendiente |
+| 8 | Testing y QA | ⚠️ Suite de tests automatizados (23) + CI en GitHub Actions · usabilidad/rendimiento pendientes |
 
 ---
 
