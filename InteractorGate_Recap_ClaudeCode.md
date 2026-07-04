@@ -26,7 +26,7 @@
 | 5 | Real AI model integration | ⚠️ In progress — RNN text prediction real (PyTorch LSTM); CNN eye-tracking still stubbed (OE3-I2) |
 | 6 | Security hardening & Azure integration | ✅ Complete |
 | 7 | CI/CD & deployment | ✅ Complete — live on Azure |
-| 8 | Testing & QA | ⚠️ Pending — test scaffolding only, no real test cases |
+| 8 | Testing & QA | ⚠️ In progress — automated test suite (23 tests) + CI gating on GitHub Actions; usability/accessibility/performance still pending |
 
 **Backend (OE3-I1) is functional and deployed end-to-end:** auth + predictions on Azure SQL, logs on Cosmos DB, secrets in Key Vault, CI/CD to App Service. Remaining work is replacing the AI stubs with trained CNN/RNN models (OE3-I2) and the QA suite (OE4).
 
@@ -292,7 +292,7 @@ The POST writes a real document to the \`interaction_logs\` collection in Cosmos
 
 ## Phase 8 — Testing & QA ⚠️
 
-**Status:** Pending (OE4). Only Django's default empty `tests.py` scaffolding exists in `users`, `predictions`, and `interaction_logs` — no real unit/integration test cases yet. Usability testing with target users, accessibility validation, performance/latency tests, and the QA report against the success indicators all remain to be done.
+**Status:** In progress (OE4). **Automated test suite done:** 23 unit/integration tests across `users`, `predictions`, and `interaction_logs` (registration, JWT auth flow, profile, logout/blacklist, login throttling, real RNN + CNN prediction paths, user-scoped history, Cosmos-mocked log write/read + user isolation). Runs on in-memory SQLite via `config/settings/test.py` with Cosmos DB mocked — no external services. **CI/CD:** `.github/workflows/tests.yml` runs the suite on every PR and push to `develop`; `deploy.yml` now gates the Azure deployment on the suite passing (`needs: test`). **Still pending:** usability testing with target users, accessibility validation, performance/latency tests, and the QA report against the success indicators.
 
 **Objective:** Validate functionality, accessibility, and performance (charter OE4).
 

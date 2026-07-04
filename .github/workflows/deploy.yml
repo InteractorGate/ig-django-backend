@@ -10,7 +10,12 @@ env:
   WEBAPP_NAME: ig-backend-tesis
 
 jobs:
+  # Run the full test suite first; deployment only proceeds if it passes.
+  test:
+    uses: ./.github/workflows/tests.yml
+
   build-and-deploy:
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

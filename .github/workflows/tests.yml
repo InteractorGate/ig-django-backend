@@ -1,0 +1,34 @@
+name: Tests
+
+on:
+  push:
+    branches: [develop]
+  pull_request:
+  workflow_dispatch:
+  workflow_call:      # lets deploy.yml gate the deployment on this suite
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install unixODBC (pyodbc dependency)
+        run: sudo apt-get update && sudo apt-get install -y unixodbc-dev
+
+      - name: Install PyTorch (CPU build)
+        # CPU wheel keeps CI fast/light; "+cpu" satisfies the torch==2.12.1 pin.
+        run: pip install torch==2.12.1 --index-url https://download.pytorch.org/whl/cpu
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run test suite
+        # Test settings use in-memory SQLite and mock Cosmos — no external services.
+        run: python manage.py test --settings=config.settings.test --verbosity=2
