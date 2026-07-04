@@ -10,6 +10,17 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    # Dummy values so config/settings/base.py imports in CI (no .env here).
+    # The test settings override the DB to SQLite and mock Cosmos, so these
+    # are never used to connect anywhere — they only satisfy env() at import.
+    env:
+      DJANGO_SECRET_KEY: test-secret-key-not-for-production
+      SQL_DB: test
+      SQL_USER: test
+      SQL_PASSWORD: test
+      SQL_HOST: localhost
+      MONGO_URI: mongodb://localhost:27017/test
+      MONGO_DB: test
     steps:
       - uses: actions/checkout@v4
 
