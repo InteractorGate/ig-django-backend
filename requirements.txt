@@ -15,3 +15,10 @@ pytz==2026.2
 sqlparse==0.5.5
 tzdata==2026.2
 whitenoise==6.12.0
+
+# ── Deep Learning: RNN contextual text prediction (Phase 5) ──────────────────
+# The Docker image installs the CPU build of torch (see Dockerfile) to avoid the
+# multi-GB CUDA wheels — Azure App Service B1 has no GPU. "==2.12.1" matches the
+# "2.12.1+cpu" local build, so this pin is satisfied by the CPU wheel.
+numpy==2.5.0
+torch==2.12.1

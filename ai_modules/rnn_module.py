@@ -1,25 +1,9 @@
-"""Stub RNN contextual text-prediction module.
+"""RNN contextual text-prediction module (real PyTorch LSTM).
 
-The real implementation (PyTorch) will replace ``TextPredictor.predict()``
-in a later sprint. For now it returns canned phrase suggestions so the
-pipeline is testable.
+The implementation now lives in the ``ai_modules.rnn`` package. This module
+stays as the stable import path used by the orchestrator; it re-exports the
+real ``TextPredictor`` so no caller had to change when the stub was replaced.
+
+Training the artifact:  python -m ai_modules.rnn.train
 """
-import random
-
-
-class TextPredictor:
-    """Suggests next phrases given the current text context."""
-
-    _PHRASES = [
-        ["quiero agua", "quiero comer", "necesito ayuda"],
-        ["estoy bien", "me duele algo", "tengo sueño"],
-        ["gracias", "por favor", "hablamos más tarde"],
-    ]
-
-    def predict(self, context):
-        """context: current text / list of words. Returns suggested phrases."""
-        suggestions = random.choice(self._PHRASES)
-        return {
-            "suggestions": suggestions,
-            "confidence": round(random.uniform(0.70, 0.95), 3),
-        }
+from ai_modules.rnn.infer import TextPredictor  # noqa: F401

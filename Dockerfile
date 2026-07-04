@@ -20,9 +20,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && ACCEPT_EULA=Y apt-get install -y --no-install-recommends msodbcsql18 \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
+# Install Python dependencies.
+# Install the CPU build of PyTorch first from PyTorch's CPU wheel index so the
+# image doesn't pull the multi-GB CUDA build (App Service B1 has no GPU). The
+# "+cpu" wheel satisfies the "torch==2.12.1" pin in requirements.txt, so the
+# subsequent -r install won't re-download it.
 COPY requirements.txt .
-RUN pip install --upgrade pip && pip install -r requirements.txt
+RUN pip install --upgrade pip \
+    && pip install --index-url https://download.pytorch.org/whl/cpu torch==2.12.1 \
+    && pip install -r requirements.txt
 
 # Copy project
 COPY . .
