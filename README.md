@@ -163,13 +163,45 @@ Detalle completo de cuerpos y respuestas en [`docs/API.md`](docs/API.md).
 
 ---
 
+## Tests
+
+Suite de **23 pruebas** unitarias y de integración (auth, predicciones y logs).
+Se ejecutan sobre **SQLite en memoria** y con **Cosmos DB simulado (mock)**, por
+lo que no requieren `.env` ni conexión a servicios externos.
+
+```powershell
+python manage.py test --settings=config.settings.test
+```
+
+Cobertura:
+
+- **`users`** — registro (éxito, contraseñas no coinciden, contraseña débil,
+  usuario duplicado), login/JWT, perfil (`/me/`), logout con blacklist y
+  throttling de login (429).
+- **`predictions`** — ruta real del **RNN** (texto), ruta CNN (mirada),
+  validación de entrada, e historial acotado por usuario.
+- **`interaction_logs`** — escritura/lectura de eventos y aislamiento entre
+  usuarios, con una colección Mongo falsa en memoria.
+
+> Las settings de test (`config/settings/test.py`) usan hashing rápido y
+> desactivan el throttling salvo en la prueba dedicada.
+
+### Integración continua (CI/CD)
+
+- **`.github/workflows/tests.yml`** — ejecuta la suite en cada *Pull Request* y
+  en cada *push* a `develop`.
+- **`.github/workflows/deploy.yml`** — el despliegue a Azure **depende de que
+  los tests pasen** (`needs: test`): si la suite falla, no se despliega.
+
+---
+
 ## Despliegue
 
 Contenedor Docker desplegado en **Azure App Service for Containers**
-(`ig-backend-tesis`, plan B1). CI/CD con **GitHub Actions**: build → push a
-**Azure Container Registry** → deploy en cada push a `main`. Los secretos se
-gestionan con **Azure Key Vault** (referencias + identidad administrada) y el
-tráfico va sobre **HTTPS/TLS**.
+(`ig-backend-tesis`, plan B1). CI/CD con **GitHub Actions**: los tests corren
+primero y, solo si pasan, se hace build → push a **Azure Container Registry** →
+deploy en cada push a `main`. Los secretos se gestionan con **Azure Key Vault**
+(referencias + identidad administrada) y el tráfico va sobre **HTTPS/TLS**.
 
 ---
 
