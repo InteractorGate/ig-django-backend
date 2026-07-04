@@ -1,0 +1,23 @@
+{
+  "model": "PhraseLSTM",
+  "framework": "pytorch-2.12.1+cpu",
+  "epochs": 120,
+  "vocab_size": 142,
+  "train_sentences": 103,
+  "config": {
+    "embed_dim": 64,
+    "hidden_dim": 128,
+    "num_layers": 1,
+    "dropout": 0.2
+  },
+  "train": {
+    "loss": 1.002,
+    "perplexity": 2.724,
+    "top3_accuracy": 0.7985
+  },
+  "val": {
+    "loss": 4.9659,
+    "perplexity": 143.437,
+    "top3_accuracy": 0.4182
+  }
+}
