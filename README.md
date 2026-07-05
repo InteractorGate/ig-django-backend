@@ -25,7 +25,9 @@ responsabilidades:
   modelo de IA correspondiente y devuelve el resultado.
   - **RNN (texto):** modelo real **LSTM en PyTorch** que sugiere frases
     contextuales para el tablero de comunicación.
-  - **CNN (mirada):** reconocimiento de la mirada (en desarrollo).
+  - **CNN (mirada):** modelo real **CNN en PyTorch** entrenado sobre el dataset
+    **MPIIGaze** que estima la dirección de la mirada y selecciona la celda del
+    tablero.
 - **Registro de interacciones (telemetría)** en una base documental para
   análisis y reentrenamiento futuro de los modelos.
 
@@ -71,7 +73,8 @@ ig-django-backend/
 ├── interaction_logs/       # Escritura/lectura de telemetría (Cosmos DB, sin ORM)
 ├── ai_modules/
 │   ├── orchestrator.py     # Enruta la petición al modelo CNN o RNN
-│   ├── cnn_module.py       # Eye tracking (stub — en desarrollo)
+│   ├── cnn_module.py       # Re-exporta el EyeTracker real
+│   ├── cnn/                # Modelo CNN real (PyTorch, MPIIGaze): dataset, modelo, entrenamiento, inferencia
 │   ├── rnn_module.py       # Re-exporta el TextPredictor real
 │   └── rnn/                # Modelo RNN real (LSTM PyTorch): corpus, vocab, entrenamiento, inferencia
 ├── docs/API.md             # Contrato de la API para el frontend
@@ -140,6 +143,28 @@ español. Documentación y benchmark en
 # (Re)entrenar el modelo y regenerar el artefacto + métricas
 python -m ai_modules.rnn.train
 ```
+
+---
+
+## Modelo de IA — CNN (estimación de la mirada)
+
+Modelo **CNN real en PyTorch** de estimación de mirada *appearance-based*,
+entrenado sobre el dataset **MPIIGaze** (CC BY-NC-SA 4.0). A partir de un parche
+de ojo en gris (36×60) predice la dirección de mirada 2D (pitch, yaw) y
+selecciona la celda del tablero. Error angular **cross-person** (val):
+**7.67°**. Documentación, protocolo y cita en
+[`ai_modules/cnn/README.md`](ai_modules/cnn/README.md).
+
+```powershell
+# Reentrenar (requiere el dataset MPIIGaze y scipy, solo para entrenamiento)
+pip install scipy
+$env:MPIIGAZE_DIR = "C:\ruta\a\MPIIGaze"   # carpeta con Data\Normalized
+python -m ai_modules.cnn.train
+```
+
+> El rastreo de mirada en tiempo real corre en el **cliente** (tracker + sidecar
+> Flutter). Este modelo del backend es el entregable entrenado con dataset y
+> atiende la ruta de verificación por lotes de `/api/predictions/`.
 
 ---
 
@@ -213,7 +238,7 @@ deploy en cada push a `main`. Los secretos se gestionan con **Azure Key Vault**
 | 2 | API principal (identidad y auth) | ✅ Completo |
 | 3 | Pipeline de predicción | ✅ Completo |
 | 4 | Logs de interacción (Cosmos DB) | ✅ Completo |
-| 5 | Integración de modelos de IA | ⚠️ RNN real (LSTM PyTorch) · CNN en desarrollo |
+| 5 | Integración de modelos de IA | ✅ RNN real (LSTM PyTorch) · CNN real (PyTorch, MPIIGaze — 7.67° cross-person) |
 | 6 | Hardening de seguridad + Azure | ✅ Completo |
 | 7 | CI/CD y despliegue | ✅ Completo |
 | 8 | Testing y QA | ⚠️ Suite de tests automatizados (23) + CI en GitHub Actions · usabilidad/rendimiento pendientes |

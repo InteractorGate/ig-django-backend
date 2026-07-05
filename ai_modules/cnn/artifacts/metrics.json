@@ -1,0 +1,53 @@
+{
+  "model": "GazeCNN",
+  "dataset": "MPIIGaze (Normalized)",
+  "framework": "pytorch-2.12.1+cpu",
+  "epochs": 20,
+  "params": 253282,
+  "config": {
+    "channels": [
+      16,
+      32,
+      64
+    ],
+    "fc_dim": 128,
+    "dropout": 0.3
+  },
+  "image_size": [
+    36,
+    60
+  ],
+  "train_participants": [
+    "p00",
+    "p01",
+    "p02",
+    "p03",
+    "p04",
+    "p05",
+    "p06",
+    "p07",
+    "p08",
+    "p09",
+    "p10",
+    "p11"
+  ],
+  "val_participants": [
+    "p12",
+    "p13",
+    "p14"
+  ],
+  "train_samples": 18000,
+  "val_samples": 4500,
+  "norm": {
+    "mean": 0.50613,
+    "std": 0.28989
+  },
+  "train": {
+    "mse": 0.00635,
+    "mean_angular_error_deg": 5.673
+  },
+  "val": {
+    "mse": 0.01137,
+    "mean_angular_error_deg": 7.669
+  }
+}

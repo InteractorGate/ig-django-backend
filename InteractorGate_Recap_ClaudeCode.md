@@ -23,12 +23,12 @@
 | 2 | Core API (Identity & Auth) | ✅ Complete |
 | 3 | Prediction pipeline | ✅ Complete |
 | 4 | Interaction logs (Cosmos DB) | ✅ Complete |
-| 5 | Real AI model integration | ⚠️ In progress — RNN text prediction real (PyTorch LSTM); CNN eye-tracking still stubbed (OE3-I2) |
+| 5 | Real AI model integration | ✅ Complete — RNN text prediction real (PyTorch LSTM); CNN gaze estimation real (PyTorch, trained on MPIIGaze, 7.67° cross-person) (OE3-I2) |
 | 6 | Security hardening & Azure integration | ✅ Complete |
 | 7 | CI/CD & deployment | ✅ Complete — live on Azure |
 | 8 | Testing & QA | ⚠️ In progress — automated test suite (23 tests) + CI gating on GitHub Actions; usability/accessibility/performance still pending |
 
-**Backend (OE3-I1) is functional and deployed end-to-end:** auth + predictions on Azure SQL, logs on Cosmos DB, secrets in Key Vault, CI/CD to App Service. Remaining work is replacing the AI stubs with trained CNN/RNN models (OE3-I2) and the QA suite (OE4).
+**Backend (OE3-I1) is functional and deployed end-to-end:** auth + predictions on Azure SQL, logs on Cosmos DB, secrets in Key Vault, CI/CD to App Service. Both AI models are now real and dataset-trained (OE3-I2): RNN (PyTorch LSTM) and CNN (PyTorch, MPIIGaze). Remaining work is the QA suite (OE4) and, on the client, wiring the gaze CNN into the real-time tracker.
 
 Live URL: `https://ig-backend-tesis.azurewebsites.net`
 
@@ -237,14 +237,14 @@ The POST writes a real document to the \`interaction_logs\` collection in Cosmos
 
 ---
 
-## Phase 5 — Real AI model integration ⚠️
+## Phase 5 — Real AI model integration ✅
 
-**Status:** In progress (OE3-I2).
+**Status:** Complete (OE3-I2). Both AI stubs replaced with real, dataset-trained PyTorch models.
 
 - **RNN text prediction — done (real).** `ai_modules/rnn/` holds a real PyTorch word-level **LSTM** language model trained on a curated Spanish AAC corpus. `TextPredictor` (re-exported by `ai_modules/rnn_module.py`) loads the trained artifact `ai_modules/rnn/artifacts/phrase_lstm.pt` **once** and returns ranked phrase suggestions with a real softmax `confidence_score`; torch is imported lazily so startup and the gaze path pay no cost. Training via `python -m ai_modules.rnn.train` writes the artifact + `metrics.json` and records a document to the Cosmos DB `training_history` collection. Initial benchmark: train perplexity 2.72 / top-3 79.9%, val top-3 41.8% on a 103-sentence corpus (see `ai_modules/rnn/README.md`).
-- **CNN eye-tracking — still stubbed.** `ai_modules/cnn_module.EyeTracker` returns random gaze data; no trained `.h5`/`.keras` artifact yet. This is the remaining Phase 5 work (see recommended architecture below).
+- **CNN gaze estimation — done (real).** `ai_modules/cnn/` holds a real PyTorch **appearance-based gaze CNN** (3 conv blocks → MLP head, 253K params, ~1 MB artifact) trained on the **MPIIGaze** dataset (CC BY-NC-SA 4.0). It maps a normalised 36×60 grayscale eye patch → 2D gaze angle (pitch, yaw), then projects to the AAC board cell with a real selection confidence. `EyeTracker` (re-exported by `ai_modules/cnn_module.py`) loads `ai_modules/cnn/artifacts/gaze_cnn.pt` **once**; torch is lazy. Training via `python -m ai_modules.cnn.train` writes the artifact + `metrics.json` and records Cosmos `training_history`. Benchmark (participant-disjoint / cross-person, eye-image-only): **train 5.67° · val 7.67°** mean angular error, 18K/4.5K patches (see `ai_modules/cnn/README.md`). Note: real-time gaze runs on the **client** (existing tracker + Flutter sidecar); this backend model is the trained, dataset-backed deliverable and serves the batch/verification path. The dataset lives outside the repo (`MPIIGAZE_DIR`); only the trained artifact is committed.
 
-**Objective:** Replace stubs with trained CNN and RNN models.
+**Objective:** Replace stubs with trained CNN and RNN models. **Done** — both are real. Optional future work: head-pose fusion + full leave-one-person-out for the CNN; wiring the trained CNN into the client-side real-time tracker.
 
 ### Requirements
 - CNN: OpenCV frame capture → gaze detection → coordinates, integrated with TensorFlow
