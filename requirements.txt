@@ -22,3 +22,9 @@ whitenoise==6.12.0
 # "2.12.1+cpu" local build, so this pin is satisfied by the CPU wheel.
 numpy==2.5.0
 torch==2.12.1
+
+# ── CNN gaze estimation (Phase 5) ────────────────────────────────────────────
+# Inference needs only torch+numpy (the trained artifact is committed). scipy is
+# required ONLY to (re)train from the MPIIGaze .mat files — install it manually
+# for training; it is intentionally NOT a runtime/deploy dependency.
+#   pip install scipy   # then: python -m ai_modules.cnn.train
