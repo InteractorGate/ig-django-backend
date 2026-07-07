@@ -1,26 +1,9 @@
-"""Stub CNN eye-tracking module.
+"""CNN eye-tracking module (real appearance-based gaze model).
 
-The real implementation (OpenCV + TensorFlow) will replace
-``EyeTracker.predict()`` in a later sprint. For now it returns plausible
-gaze coordinates so the prediction pipeline can be wired and tested
-end-to-end.
+The implementation now lives in the ``ai_modules.cnn`` package. This module
+stays as the stable import path used by the orchestrator; it re-exports the
+real ``EyeTracker`` so no caller had to change when the stub was replaced.
+
+Training the artifact:  python -m ai_modules.cnn.train
 """
-import random
-
-
-class EyeTracker:
-    """Maps a camera frame to a gaze point and the AAC cell it selects."""
-
-    # Demo communication-board cells the gaze can land on.
-    _CELLS = ["sí", "no", "agua", "comida", "ayuda", "baño", "dormir", "gracias"]
-
-    def predict(self, frame):
-        """frame: raw payload (base64 image, coords, ...). Returns gaze data."""
-        x = round(random.uniform(0.0, 1.0), 3)
-        y = round(random.uniform(0.0, 1.0), 3)
-        selected = self._CELLS[int(x * len(self._CELLS)) % len(self._CELLS)]
-        return {
-            "gaze": {"x": x, "y": y},
-            "selected": selected,
-            "confidence": round(random.uniform(0.75, 0.99), 3),
-        }
+from ai_modules.cnn.infer import EyeTracker  # noqa: F401

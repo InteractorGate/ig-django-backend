@@ -54,7 +54,15 @@ class PredictionEndpointTests(APITestCase):
             format="json",
         )
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(res.data["result"]["model_used"], "CNN")
+        result = res.data["result"]
+        self.assertEqual(result["model_used"], "CNN")
+        # Real model output: a selected board cell and a valid probability.
+        # (An unparseable frame degrades to a neutral patch but still runs the
+        # real CNN, so we always get a cell + confidence back.)
+        self.assertTrue(result["output_text"])
+        self.assertGreaterEqual(result["confidence_score"], 0.0)
+        self.assertLessEqual(result["confidence_score"], 1.0)
+        self.assertGreaterEqual(result["response_time_ms"], 0)
 
     def test_invalid_input_type_is_rejected(self):
         res = self.client.post(
