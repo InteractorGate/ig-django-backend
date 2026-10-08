@@ -192,13 +192,18 @@ Cosmos DB (no SQL). `user_id` and a fallback `timestamp` are added server-side.
   "event_type": "selection",
   "gaze_coordinates": { "x": 0.42, "y": 0.71 },
   "selected_word": "agua",
-  "timestamp": "2026-07-04T12:34:56Z"
+  "timestamp": "2026-07-04T12:34:56Z",
+  "data": { "source": "word_cell", "text_length": 9 }
 }
 ```
 - `event_type` ∈ `gaze` · `selection` · `dwell` · `calibration` ·
-  `session_start` · `session_end`.
-- `gaze_coordinates`, `selected_word`, `timestamp` are all optional
-  (`timestamp` defaults to server UTC now).
+  `session_start` · `session_end` · `delete` · `clear` · `suggestions` ·
+  `trial_start` · `trial_end` · `settings`.
+- `gaze_coordinates`, `selected_word`, `timestamp` and `data` are all optional.
+  `timestamp` is the **client** clock (when the event happened) and defaults to
+  server UTC now; the server also stores `received_at` (arrival time).
+- `data` is a free-form object with event-specific detail (study condition,
+  target phrase, suggestion rank, latency…), capped at 4 KB, so images never fit.
 
 `201` → the stored document, including a generated `id` and `user_id`:
 ```json
@@ -209,7 +214,9 @@ Cosmos DB (no SQL). `user_id` and a fallback `timestamp` are added server-side.
   "event_type": "selection",
   "gaze_coordinates": { "x": 0.42, "y": 0.71 },
   "selected_word": "agua",
-  "timestamp": "2026-07-04T12:34:56Z"
+  "data": { "source": "word_cell", "text_length": 9 },
+  "timestamp": "2026-07-04T12:34:56Z",
+  "received_at": "2026-07-04T12:34:56.310Z"
 }
 ```
 
