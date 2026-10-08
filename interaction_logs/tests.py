@@ -4,6 +4,7 @@ These logs live in Cosmos DB (via PyMongo), not the Django ORM. The Mongo
 collection is replaced with an in-memory fake so the tests run offline with no
 real database connection.
 """
+from datetime import datetime, timezone
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
@@ -121,3 +122,35 @@ class InteractionLogsTests(APITestCase):
         res = self.client.get(self._session_url("shared"))
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data["count"], 0)
+
+    def test_write_log_stores_study_event_with_data(self):
+        self.client.force_authenticate(self.user)
+        payload = {
+            "session_id": "sess-1",
+            "event_type": "trial_start",
+            "timestamp": "2026-10-08T15:00:00.123Z",
+            "data": {"condition": "con_prediccion", "target": "quiero agua"},
+        }
+        res = self.client.post(self.log_url, payload, format="json")
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        doc = self.collection.docs[0]
+        self.assertEqual(doc["data"]["condition"], "con_prediccion")
+        # The client clock is kept apart from the server's arrival time.
+        self.assertEqual(
+            doc["timestamp"],
+            datetime(2026, 10, 8, 15, 0, 0, 123000, tzinfo=timezone.utc),
+        )
+        self.assertIn("received_at", doc)
+        self.assertNotEqual(doc["received_at"], doc["timestamp"])
+
+    def test_write_log_rejects_oversized_data(self):
+        # A base64 camera frame must never make it into the logs.
+        self.client.force_authenticate(self.user)
+        res = self.client.post(
+            self.log_url,
+            {"session_id": "s", "event_type": "selection",
+             "data": {"frame": "A" * 10_000}},
+            format="json",
+        )
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(len(self.collection.docs), 0)

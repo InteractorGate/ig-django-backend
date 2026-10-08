@@ -28,6 +28,7 @@ class LogInteractionView(APIView):
         serializer = InteractionLogSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
+        now = datetime.now(timezone.utc)
 
         document = {
             "user_id": request.user.id,
@@ -35,7 +36,11 @@ class LogInteractionView(APIView):
             "event_type": data["event_type"],
             "gaze_coordinates": data.get("gaze_coordinates"),
             "selected_word": data.get("selected_word"),
-            "timestamp": data.get("timestamp") or datetime.now(timezone.utc),
+            "data": data.get("data"),
+            # Client clock (when it happened) vs. server clock (when it
+            # arrived): their difference is the network delay.
+            "timestamp": data.get("timestamp") or now,
+            "received_at": now,
         }
         result = interaction_logs_collection().insert_one(document)
         return Response(
