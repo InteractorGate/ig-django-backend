@@ -14,3 +14,16 @@ from django.core.wsgi import get_wsgi_application
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
 application = get_wsgi_application()
+
+# Warm the RNN before this worker takes traffic. Without it, the first text
+# prediction on each gunicorn worker imported torch and loaded the model
+# inside the request: 25-68 s on App Service B1 after every deploy/restart,
+# which breaks the p95 < 3 s criterion (I-8). gunicorn only routes requests
+# to a worker once this module has been imported. Best-effort: a missing
+# artifact must not stop the API from booting.
+try:
+    from ai_modules.rnn.infer import TextPredictor
+
+    TextPredictor().predict("hola")
+except Exception:  # pragma: no cover - logged by the first real request
+    pass
