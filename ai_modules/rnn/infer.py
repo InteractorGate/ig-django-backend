@@ -39,6 +39,12 @@ def _load_model():
 
         from .model import PhraseLSTM
 
+        # One intra-op thread per process. The model is tiny (~127k params,
+        # ~2 ms per call); on a 1-core App Service plan, several gunicorn
+        # workers each spawning a full thread pool fight over the core and
+        # turned 2 ms calls into 0.6-1.3 s.
+        torch.set_num_threads(1)
+
         checkpoint = torch.load(MODEL_PATH, map_location="cpu")
         vocab = Vocabulary.from_dict(checkpoint["vocab"])
         model = PhraseLSTM(
