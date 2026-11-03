@@ -34,8 +34,8 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y unixodbc-dev
 
       - name: Install PyTorch (CPU build)
-        # CPU wheel keeps CI fast/light; "+cpu" satisfies the torch==2.12.1 pin.
-        run: pip install torch==2.12.1 --index-url https://download.pytorch.org/whl/cpu
+        # Match requirements.txt so pip does not replace CPU with a CUDA build.
+        run: pip install torch==2.13.0 --index-url https://download.pytorch.org/whl/cpu
 
       - name: Install dependencies
         run: pip install -r requirements.txt
