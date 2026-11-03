@@ -23,4 +23,4 @@ def root(request):
 
 def healthz(request):
     """GET /healthz/ — lightweight liveness probe for monitoring."""
-    return JsonResponse({"status": "ok"})
+    return JsonResponse({"status": "ok", "telemetry_schema": 2})

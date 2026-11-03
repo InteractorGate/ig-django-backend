@@ -186,6 +186,28 @@ Fire-and-store events for analysis and future model retraining. Stored in
 Cosmos DB (no SQL). `user_id` and a fallback `timestamp` are added server-side.
 
 ### `POST /api/logs/` — write one event (Bearer)
+
+**Reliable v2 contract:** also send `event_id` (UUID v4), `participant_id`, `sequence` (positive
+session counter) and `timestamp` (client ISO UTC time). `event_id` requires both
+other fields and `participant_id`. A mismatch with the token's user returns 403
+before writing anything. New responses include `event_id`, `sequence`, `schema_version: 2`
+and the authenticated `user_id`. The client must check the acknowledgement
+before removing its persisted event.
+
+The first insert returns 201; an identical replay returns 200 with the original
+document and first `received_at`. Reusing the ID with a different payload returns
+409. Keys are scoped to the authenticated user and use MongoDB's unique `_id`,
+so concurrent retries do not require a separate index migration. BSON timestamp
+comparison uses millisecond precision. Legacy clients without IDs remain
+supported, but cannot claim reliable replay or complete reconstruction.
+
+Study edits contain `data.action`, `inserted_text`, `removed_characters` and
+`text_length`, alongside trial/condition/order metadata. Suggestions use
+`action: requested` or `shown`; the latter includes options, request ID and
+`latency_ms` until their presentation. Acceptance records the same request ID
+and 1-based `suggestion_rank`. Data fields are explicitly allowed, lists/text
+are bounded, and `data` is limited to 4096 UTF-8 bytes. Images and arbitrary
+nested objects are not accepted as telemetry fields.
 ```json
 {
   "session_id": "b3f1c2a4-....",
@@ -202,8 +224,10 @@ Cosmos DB (no SQL). `user_id` and a fallback `timestamp` are added server-side.
 - `gaze_coordinates`, `selected_word`, `timestamp` and `data` are all optional.
   `timestamp` is the **client** clock (when the event happened) and defaults to
   server UTC now; the server also stores `received_at` (arrival time).
-- `data` is a free-form object with event-specific detail (study condition,
-  target phrase, suggestion rank, latency…), capped at 4 KB, so images never fit.
+- `data` contains the allowed event-specific fields (study condition, target
+  phrase, suggestion rank, latency…). It is capped at 4 KB of UTF-8 JSON and
+  rejects unsupported keys and arbitrary nested objects. Legacy documented
+  fields such as `source` and `target` remain accepted.
 
 `201` → the stored document, including a generated `id` and `user_id`:
 ```json
@@ -222,6 +246,13 @@ Cosmos DB (no SQL). `user_id` and a fallback `timestamp` are added server-side.
 
 ### `GET /api/logs/session/<session_id>/` — read a session's events (Bearer)
 Returns only the **calling user's** events for that session, sorted by time.
+
+The response also contains `summary` with causal sequence gaps/duplicates and
+per-trial reconstruction, action counts, displayed-suggestion latencies and
+comparison with the final text. Missing metadata, open trials, inconsistent
+edits or suggestion acceptance without its displayed option are not approved
+as consistent. Legacy events are counted separately. At most 10000 events are
+exported per session; exceeding that limit returns 413.
 `200` →
 ```json
 { "session_id": "b3f1c2a4-....", "count": 2, "logs": [ { "...": "..." } ] }
