@@ -40,6 +40,7 @@ class InteractionLogSerializer(serializers.Serializer):
 
     session_id = serializers.CharField(max_length=100)
     event_id = serializers.UUIDField(required=False)
+    participant_id = serializers.IntegerField(min_value=1, required=False)
     sequence = serializers.IntegerField(min_value=1, required=False)
     event_type = serializers.ChoiceField(choices=EVENT_TYPES)
     gaze_coordinates = GazeCoordinatesSerializer(required=False, allow_null=True)
@@ -54,9 +55,10 @@ class InteractionLogSerializer(serializers.Serializer):
     def validate(self, attrs):
         event_id = attrs.get("event_id")
         if event_id is not None:
-            if event_id.version != 4 or "sequence" not in attrs or "timestamp" not in attrs:
+            if (event_id.version != 4 or "sequence" not in attrs
+                    or "timestamp" not in attrs or "participant_id" not in attrs):
                 raise serializers.ValidationError(
-                    "event_id must be UUID v4 and requires sequence and timestamp."
+                    "event_id must be UUID v4 and requires participant_id, sequence and timestamp."
                 )
         elif "sequence" in attrs:
             raise serializers.ValidationError("sequence requires event_id.")

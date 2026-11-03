@@ -12,6 +12,7 @@ for key, value in {
     "MONGO_DB": "ig_block3_pilot",
 }.items():
     os.environ.setdefault(key, value)
+os.environ["DJANGO_SECRET_KEY"] = "local-block3-pilot-not-production-2026-abcdef123456"
 os.environ["DJANGO_SETTINGS_MODULE"] = "config.settings.test"
 
 import django

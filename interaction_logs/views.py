@@ -30,6 +30,9 @@ class LogInteractionView(APIView):
         serializer = InteractionLogSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
+        if data.get("participant_id", request.user.id) != request.user.id:
+            return Response({"detail": "Event participant does not match the authenticated account."},
+                            status=status.HTTP_403_FORBIDDEN)
         now = datetime.now(timezone.utc)
         timestamp = data.get("timestamp") or now
         # BSON dates have millisecond precision; compare retries at that precision.

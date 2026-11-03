@@ -212,7 +212,7 @@ class InteractionLogsTests(APITestCase):
         self.assertEqual(len(self.collection.docs), 0)
 
     def _event(self, sequence=1, **overrides):
-        return {"session_id": "study-session", "event_id": str(uuid4()),
+        return {"session_id": "study-session", "event_id": str(uuid4()), "participant_id":self.user.id,
                 "sequence": sequence, "timestamp": "2026-11-03T10:00:00.123456Z",
                 "event_type": "selection", **overrides}
 
@@ -243,7 +243,7 @@ class InteractionLogsTests(APITestCase):
         first = self.client.post(self.log_url, {**payload, "user_id": self.other.id}, format="json")
         self.assertEqual(first.data["user_id"], self.user.id)
         self.client.force_authenticate(self.other)
-        second = self.client.post(self.log_url, payload, format="json")
+        second = self.client.post(self.log_url, {**payload,"participant_id":self.other.id}, format="json")
         self.assertEqual(second.status_code, 201)
         self.assertNotEqual(first.data["id"], second.data["id"])
         logs = self.client.get(self._session_url("study-session")).data["logs"]
@@ -253,13 +253,20 @@ class InteractionLogsTests(APITestCase):
     def test_v2_requires_sequence_clock_and_valid_id_and_rejects_images(self):
         self.client.force_authenticate(self.user)
         payload = self._event()
-        for missing in ("sequence", "timestamp"):
+        for missing in ("participant_id", "sequence", "timestamp"):
             self.assertEqual(self.client.post(self.log_url,
                 {k:v for k,v in payload.items() if k != missing}, format="json").status_code, 400)
         for data in ({"frame": "tiny-image"}, {"suggestions": [{"image": "x"}]}):
             self.assertEqual(self.client.post(self.log_url, self._event(data=data),
                 format="json").status_code, 400)
         self.assertEqual(self.collection.docs, [])
+
+    def test_wrong_token_account_cannot_persist_another_participants_event(self):
+        payload=self._event()
+        self.client.force_authenticate(self.other)
+        response=self.client.post(self.log_url,payload,format="json")
+        self.assertEqual(response.status_code,403)
+        self.assertEqual(self.collection.docs,[])
 
     def test_session_reconstructs_corrections_and_suggestion_after_entire_batch_replay(self):
         self.client.force_authenticate(self.user)

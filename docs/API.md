@@ -187,9 +187,10 @@ Cosmos DB (no SQL). `user_id` and a fallback `timestamp` are added server-side.
 
 ### `POST /api/logs/` — write one event (Bearer)
 
-**Reliable v2 contract:** also send `event_id` (UUID v4), `sequence` (positive
+**Reliable v2 contract:** also send `event_id` (UUID v4), `participant_id`, `sequence` (positive
 session counter) and `timestamp` (client ISO UTC time). `event_id` requires both
-other fields. New responses include `event_id`, `sequence`, `schema_version: 2`
+other fields and `participant_id`. A mismatch with the token's user returns 403
+before writing anything. New responses include `event_id`, `sequence`, `schema_version: 2`
 and the authenticated `user_id`. The client must check the acknowledgement
 before removing its persisted event.
 

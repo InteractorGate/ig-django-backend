@@ -30,13 +30,14 @@ def login(code):
 def main():
     token = login("LOCAL_B3")
     other = login("LOCAL_B3_2")
+    participant = request("/api/users/me/", token=token)[1]["id"]
     session_id, trial_id = str(uuid4()), str(uuid4())
     sequence = 0
 
     def event(kind, data=None):
         nonlocal sequence
         sequence += 1
-        return {"event_id": str(uuid4()), "sequence": sequence, "session_id": session_id,
+        return {"event_id": str(uuid4()), "participant_id": participant, "sequence": sequence, "session_id": session_id,
                 "event_type": kind, "timestamp": datetime.now(timezone.utc).isoformat(),
                 **({"data": data} if data is not None else {})}
 
@@ -70,6 +71,7 @@ def main():
     assert report["summary"]["consistent"], report["summary"]
     assert report["summary"]["trials"][0]["reconstructed_text"] == "AGUA por favor"
     assert request(f"/api/logs/session/{session_id}/", token=other)[1]["count"] == 0
+    assert request("/api/logs/", first, other)[0] == 403
     assert request("/api/logs/", {**first, "event_type": "session_end"}, token)[0] == 409
     print(json.dumps({"http_mongo": "pass", "concurrent_retries": 6,
                       "persisted_events": report["count"], "reconstructed_trial": True,
