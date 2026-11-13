@@ -33,6 +33,7 @@ Authorization: Bearer <access_token>
 | Authenticated (per user) | 240 / min |
 | `login` | 10 / min |
 | `register` | 20 / hour |
+| `speech` | 30 / min |
 
 A throttled response is `429 Too Many Requests` with a `Retry-After` header.
 
@@ -257,6 +258,25 @@ exported per session; exceeding that limit returns 413.
 ```json
 { "session_id": "b3f1c2a4-....", "count": 2, "logs": [ { "...": "..." } ] }
 ```
+
+---
+
+## Speech (Azure AI Speech text-to-speech)
+
+### `GET /api/speech/token/` — short-lived Azure Speech token (Bearer)
+Exchanges the server-side `AZURE_SPEECH_KEY` for an Azure token valid 10
+minutes. The key is never returned. The client then calls
+`POST https://<region>.tts.speech.microsoft.com/cognitiveservices/v1` with
+`Authorization: Bearer <token>`, `Content-Type: application/ssml+xml` and
+`X-Microsoft-OutputFormat: riff-24khz-16bit-mono-pcm`. The composed text goes
+straight to Azure; it does not pass through or get stored by this backend.
+
+`200` →
+```json
+{ "token": "eyJ...", "region": "eastus", "voice": "es-PE-CamilaNeural", "expires_in": 540 }
+```
+`503` when `AZURE_SPEECH_KEY` / `AZURE_SPEECH_REGION` are not set; `502` when
+Azure cannot issue a token. Responses carry `Cache-Control: no-store`.
 
 ---
 
