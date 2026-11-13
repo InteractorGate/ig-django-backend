@@ -14,6 +14,7 @@ def root(request):
                 "profile": "/api/users/me/",
                 "predictions": "/api/predictions/",
                 "logs": "/api/logs/",
+                "speech_token": "/api/speech/token/",
                 "admin": "/admin/",
                 "health": "/healthz/",
             },

@@ -42,4 +42,5 @@ REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {
     "user": None,
     "login": None,
     "register": None,
+    "speech": None,
 }
