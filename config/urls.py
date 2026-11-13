@@ -16,4 +16,5 @@ urlpatterns = [
     path("api/users/", include("users.urls")),
     path("api/predictions/", include("predictions.urls")),
     path("api/logs/", include("interaction_logs.urls")),
+    path("api/speech/", include("speech.urls")),
 ]

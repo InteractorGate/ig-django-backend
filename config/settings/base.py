@@ -38,6 +38,7 @@ LOCAL_APPS = [
     "users",
     "predictions",
     "interaction_logs",
+    "speech",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -148,6 +149,7 @@ REST_FRAMEWORK = {
         "user": "240/min",
         "login": "10/min",    # scoped throttle on the login endpoint
         "register": "20/hour",  # scoped throttle on registration
+        "speech": "30/min",     # Azure Speech tokens (each lasts 10 minutes)
     },
 }
 
@@ -164,6 +166,12 @@ SIMPLE_JWT = {
     "ALGORITHM": "HS256",
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
+
+# ── Azure AI Speech (text-to-speech) ───────────────────────────────────────────
+# Empty key/region disables /api/speech/token/ (503). The key stays server-side.
+AZURE_SPEECH_KEY = env("AZURE_SPEECH_KEY", default="")
+AZURE_SPEECH_REGION = env("AZURE_SPEECH_REGION", default="")
+AZURE_SPEECH_VOICE = env("AZURE_SPEECH_VOICE", default="es-PE-CamilaNeural")
 
 # ── CORS ──────────────────────────────────────────────────────────────────────
 # Env-driven so the real frontend origin(s) can be set per environment. A Flutter

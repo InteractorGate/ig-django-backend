@@ -127,6 +127,8 @@ $env:DJANGO_SETTINGS_MODULE = "config.settings.local"
 | `JWT_ACCESS_TOKEN_LIFETIME_MINUTES` | Vida del access token (por defecto 60) |
 | `JWT_REFRESH_TOKEN_LIFETIME_DAYS` | Vida del refresh token (por defecto 7) |
 | `CORS_ALLOWED_ORIGINS` | Orígenes permitidos para CORS |
+| `AZURE_SPEECH_KEY` / `AZURE_SPEECH_REGION` | Clave y región del recurso Azure AI Speech (modo discurso). Vacías = voz desactivada (503) |
+| `AZURE_SPEECH_VOICE` | Voz neural (por defecto `es-PE-CamilaNeural`; alternativa `es-PE-AlexNeural`) |
 
 > Las credenciales **nunca** se suben al repositorio: `.env` está en
 > `.gitignore`. En producción se inyectan desde **Azure Key Vault**.
